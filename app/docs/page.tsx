@@ -198,6 +198,55 @@ asbuilt scan .
 # Then reference the output:
 # User: "Read AS_BUILT_AGENT.md and use it as context."
 `}</CodeBlock>
+
+              <h3 className="font-medium">CLI Troubleshooting</h3>
+              <div className="space-y-3">
+                <div>
+                  <p className="font-medium text-foreground/90 mb-0.5">
+                    <code>asbuilt: command not found</code>
+                  </p>
+                  <p>
+                    The global npm bin directory is not in your PATH. Run{" "}
+                    <code>npm bin -g</code> to find the path and add it to your shell
+                    profile (<code>~/.bashrc</code>, <code>~/.zshrc</code>, etc.).
+                  </p>
+                </div>
+                <div>
+                  <p className="font-medium text-foreground/90 mb-0.5">Authentication expired or invalid</p>
+                  <p>
+                    Run <code>asbuilt logout</code> then <code>asbuilt login</code> again.
+                    Tokens are stored in <code>~/.asbuilt/config.json</code> — you can
+                    delete that file manually if logout fails.
+                  </p>
+                </div>
+                <div>
+                  <p className="font-medium text-foreground/90 mb-0.5">Scan hangs or times out</p>
+                  <p>
+                    The server has a 300-second limit for background processing. For large
+                    codebases, use <code>--subdir</code> to target a subdirectory, or
+                    switch to Gemini with <code>--model gemini</code> for its larger
+                    context window.
+                  </p>
+                </div>
+                <div>
+                  <p className="font-medium text-foreground/90 mb-0.5">
+                    <code>.asbuiltrc</code> values not applying
+                  </p>
+                  <p>
+                    The config file must be valid JSON and located in the project root
+                    (same directory you run the command from). CLI flags always override
+                    config file values.
+                  </p>
+                </div>
+                <div>
+                  <p className="font-medium text-foreground/90 mb-0.5">Update available notification</p>
+                  <p>
+                    Run <code>npm update -g asbuilt-cli</code> to get the latest version.
+                    Updates are manual — the CLI will notify you non-intrusively when a
+                    newer version is available.
+                  </p>
+                </div>
+              </div>
             </div>
           </Section>
 
@@ -275,6 +324,22 @@ asbuilt scan .
                 {
                   q: "Can I scan the same project multiple times?",
                   a: "Yes. Each scan is independent. Your history keeps up to 100 scans; the oldest is automatically deleted when you exceed that limit.",
+                },
+                {
+                  q: "What files are excluded from scans?",
+                  a: "node_modules, build outputs, lock files, binaries, media files, archives, minified files, and .env files are always excluded. Your project's .gitignore is also respected on top of these defaults.",
+                },
+                {
+                  q: "Can I scan private GitHub repositories?",
+                  a: "Yes. Connect your GitHub account in Settings first. This uses OAuth — you authorize once and as_built can access your private repos without you managing tokens manually.",
+                },
+                {
+                  q: "What is the premium tier?",
+                  a: "Each LLM provider has a standard (Sonnet-class) and premium (Opus-class) model. Standard handles most projects well. Enable premium for very large or architecturally complex codebases where deeper reasoning improves output quality.",
+                },
+                {
+                  q: "What PRD formats are supported for drift analysis?",
+                  a: "You can attach a PRD as .md, .txt, .pdf, or .docx. Text is extracted server-side before analysis. The PRD_DRIFT.md output documents what was implemented, what changed, what's missing, and what was added beyond the original plan.",
                 },
               ].map(({ q, a }) => (
                 <div key={q}>
