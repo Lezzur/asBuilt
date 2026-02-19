@@ -48,6 +48,7 @@ export default function NewScanPage() {
   const [subdirectory, setSubdirectory] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [errorCode, setErrorCode] = useState<string | null>(null);
 
   // Zip upload state
   const [zipFile, setZipFile] = useState<File | null>(null);
@@ -71,9 +72,12 @@ export default function NewScanPage() {
     }
   }, [authLoading, user, router]);
 
+  const MAX_UPLOAD_BYTES = 100 * 1024 * 1024; // 100 MB
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    setErrorCode(null);
 
     if (activeTab === "zip" && !zipFile) {
       setError("Please select a .zip file.");
@@ -86,6 +90,46 @@ export default function NewScanPage() {
     if (activeTab === "github" && !repoUrl.trim()) {
       setError("Please enter a GitHub repository URL.");
       return;
+    }
+
+    // ── Client-side upload validation (PRD §21) ──
+    if (activeTab === "zip" && zipFile) {
+      if (!zipFile.name.toLowerCase().endsWith(".zip")) {
+        setError("Unsupported file format. Only .zip archives are accepted.");
+        return;
+      }
+      if (zipFile.size > MAX_UPLOAD_BYTES) {
+        setError(
+          `File too large: ${(zipFile.size / 1024 / 1024).toFixed(1)} MB. Maximum upload size is 100 MB. ` +
+            `Try targeting a subdirectory, or exclude large assets before zipping.`,
+        );
+        return;
+      }
+    }
+
+    if (activeTab === "folder" && folderFiles) {
+      let totalSize = 0;
+      for (let i = 0; i < folderFiles.length; i++) {
+        totalSize += folderFiles[i].size;
+      }
+      if (totalSize > MAX_UPLOAD_BYTES) {
+        setError(
+          `Folder too large: ${(totalSize / 1024 / 1024).toFixed(1)} MB total. Maximum upload size is 100 MB. ` +
+            `Try targeting a subdirectory, or use a .zip with build output excluded.`,
+        );
+        return;
+      }
+    }
+
+    if (prdFile) {
+      const PRD_EXTENSIONS = [".md", ".txt", ".pdf", ".docx"];
+      const ext = prdFile.name.slice(prdFile.name.lastIndexOf(".")).toLowerCase();
+      if (!PRD_EXTENSIONS.includes(ext)) {
+        setError(
+          `Unsupported PRD format: ${ext}. Supported formats are .md, .txt, .pdf, and .docx.`,
+        );
+        return;
+      }
     }
 
     setSubmitting(true);
@@ -124,10 +168,11 @@ export default function NewScanPage() {
         body: formData,
       });
 
-      const data = (await res.json()) as { scanId?: string; error?: string };
+      const data = (await res.json()) as { scanId?: string; error?: string; code?: string };
 
       if (!res.ok) {
         setError(data.error ?? "Failed to start scan.");
+        setErrorCode(data.code ?? null);
         return;
       }
 
@@ -405,7 +450,49 @@ export default function NewScanPage() {
           {error && (
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
-              <AlertDescription>{error}</AlertDescription>
+              <AlertDescription>
+                <p>{error}</p>
+                {errorCode === "GITHUB_AUTH_ERROR" && (
+                  <p className="mt-1.5">
+                    <a href="/settings" className="underline font-medium">
+                      Go to Settings → GitHub
+                    </a>{" "}
+                    to connect or reconnect your account.
+                  </p>
+                )}
+                {errorCode === "GITHUB_NOT_FOUND" && (
+                  <p className="mt-1.5">
+                    Check the URL format (e.g.{" "}
+                    <code className="text-xs">https://github.com/owner/repo</code>). For private
+                    repos, ensure your account is connected in{" "}
+                    <a href="/settings" className="underline font-medium">
+                      Settings → GitHub
+                    </a>
+                    .
+                  </p>
+                )}
+                {errorCode === "GITHUB_RATE_LIMIT" && (
+                  <p className="mt-1.5">
+                    While waiting for the limit to reset, you can upload via{" "}
+                    <button
+                      type="button"
+                      className="underline font-medium"
+                      onClick={() => setActiveTab("zip")}
+                    >
+                      Zip
+                    </button>{" "}
+                    or{" "}
+                    <button
+                      type="button"
+                      className="underline font-medium"
+                      onClick={() => setActiveTab("folder")}
+                    >
+                      Folder
+                    </button>{" "}
+                    upload instead.
+                  </p>
+                )}
+              </AlertDescription>
             </Alert>
           )}
 
