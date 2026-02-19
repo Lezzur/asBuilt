@@ -1,0 +1,12 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // TODO: Replace with production rules — Opus task (Phase 2: Database & Data Model)
+    // All reads/writes go through API routes using the Admin SDK, which bypasses
+    // these rules. This placeholder blocks all direct client access.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

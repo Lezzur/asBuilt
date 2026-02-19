@@ -1,0 +1,25 @@
+{
+  "_comment": [
+    "GCS lifecycle rule — safety-net auto-delete for temporary upload files.",
+    "Primary deletion is programmatic (lib/db/scans.ts pipeline), per PRD §19.2.",
+    "This rule catches any files that were not cleaned up within 1 day.",
+    "",
+    "Apply with gsutil:",
+    "  gsutil lifecycle set storage.lifecycle.json gs://YOUR_BUCKET_NAME",
+    "",
+    "Note: GCS lifecycle minimum granularity is 1 day. True 1-hour deletion",
+    "is not achievable via lifecycle rules — the programmatic delete is the",
+    "primary mechanism. This rule is a backstop only."
+  ],
+  "lifecycle": {
+    "rule": [
+      {
+        "action": { "type": "Delete" },
+        "condition": {
+          "age": 1,
+          "matchesPrefix": ["uploads/"]
+        }
+      }
+    ]
+  }
+}
