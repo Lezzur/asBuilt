@@ -19,10 +19,12 @@
     "firebase": "^12.9.0",
     "ignore": "^7.0.5",
     "open": "^10.1.0",
-    "ora": "^8.2.0"
+    "ora": "^8.2.0",
+    "update-notifier": "^7.3.1"
   },
   "devDependencies": {
     "@types/node": "^20",
+    "@types/update-notifier": "^6.0.8",
     "typescript": "^5"
   },
   "engines": {

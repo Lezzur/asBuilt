@@ -15,13 +15,23 @@ import { login, logout, getValidToken } from "./auth.js";
 import { runScan, showHistory } from "./scan.js";
 import { getStoredAuth, getConfigDir } from "./config.js";
 import ora from "ora";
+import updateNotifier from "update-notifier";
+import { readFileSync } from "fs";
+import { fileURLToPath } from "url";
+import { dirname, join } from "path";
+
+// ─── Update check (PRD §18.2) ──────────────────────────────────────────────
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const pkg = JSON.parse(readFileSync(join(__dirname, "..", "package.json"), "utf-8"));
+updateNotifier({ pkg }).notify();
 
 const program = new Command();
 
 program
   .name("asbuilt")
   .description("Generate AI-powered documentation from your codebase")
-  .version("0.1.0");
+  .version(pkg.version);
 
 // ─── login ──────────────────────────────────────────────────────────────────
 

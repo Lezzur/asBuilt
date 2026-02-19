@@ -28,6 +28,7 @@ import {
   Loader2,
   AlertCircle,
   Info,
+  ShieldCheck,
 } from "lucide-react";
 import type { LlmProvider } from "@/lib/types";
 
@@ -495,6 +496,16 @@ export default function NewScanPage() {
               </AlertDescription>
             </Alert>
           )}
+
+          {/* Privacy notice (PRD §19.5) */}
+          <Alert>
+            <ShieldCheck className="h-4 w-4" />
+            <AlertDescription className="text-xs">
+              Your code is never stored. Files are processed in memory and deleted
+              immediately after your scan completes. <code>.env</code> files are
+              never sent to the LLM.
+            </AlertDescription>
+          </Alert>
 
           <div className="flex justify-end">
             <Button type="submit" size="lg" disabled={submitting}>
