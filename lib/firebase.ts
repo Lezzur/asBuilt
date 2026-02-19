@@ -1,7 +1,7 @@
-import { initializeApp, getApps, getApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
-import { getStorage } from "firebase/storage";
+import { initializeApp, getApps, getApp, type FirebaseApp } from "firebase/app";
+import { getAuth, type Auth } from "firebase/auth";
+import { getFirestore, type Firestore } from "firebase/firestore";
+import { getStorage, type FirebaseStorage } from "firebase/storage";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -12,9 +12,41 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+function getApp_(): FirebaseApp {
+  return getApps().length ? getApp() : initializeApp(firebaseConfig);
+}
 
-export const auth = getAuth(app);
-export const db = getFirestore(app);
-export const storage = getStorage(app);
-export default app;
+// Lazy getters to avoid initializing Firebase during SSR/build
+// when env vars may not be available.
+
+let _auth: Auth | undefined;
+export function getClientAuth(): Auth {
+  if (!_auth) _auth = getAuth(getApp_());
+  return _auth;
+}
+
+let _db: Firestore | undefined;
+export function getClientDb(): Firestore {
+  if (!_db) _db = getFirestore(getApp_());
+  return _db;
+}
+
+let _storage: FirebaseStorage | undefined;
+export function getClientStorage(): FirebaseStorage {
+  if (!_storage) _storage = getStorage(getApp_());
+  return _storage;
+}
+
+// Legacy aliases — prefer the getter functions above
+export const auth = new Proxy({} as Auth, {
+  get: (_, prop: string | symbol) =>
+    Reflect.get(getClientAuth(), prop, getClientAuth()),
+});
+export const db = new Proxy({} as Firestore, {
+  get: (_, prop: string | symbol) =>
+    Reflect.get(getClientDb(), prop, getClientDb()),
+});
+export const storage = new Proxy({} as FirebaseStorage, {
+  get: (_, prop: string | symbol) =>
+    Reflect.get(getClientStorage(), prop, getClientStorage()),
+});
