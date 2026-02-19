@@ -91,7 +91,7 @@ export default function ScanDetailPage() {
       });
       if (!res.ok) throw new Error("Failed to load scan");
       const data = (await res.json()) as { scan: ScanRecord };
-      if (data.scan.status !== "completed") {
+      if (data.scan.status !== "completed" && data.scan.status !== "partial") {
         router.push(`/scan/${scanId}/processing`);
         return;
       }

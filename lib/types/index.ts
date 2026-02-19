@@ -3,7 +3,7 @@
 export type ScanSource = "zip" | "folder" | "github" | "cli";
 export type LlmProvider = "gemini" | "claude" | "openai";
 export type LlmTier = "default" | "premium";
-export type ScanStatus = "pending" | "processing" | "completed" | "failed";
+export type ScanStatus = "pending" | "processing" | "completed" | "partial" | "failed";
 
 // ─── Shared sub-types ─────────────────────────────────────────────────────────
 

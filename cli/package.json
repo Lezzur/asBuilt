@@ -1,0 +1,32 @@
+{
+  "name": "asbuilt-cli",
+  "version": "0.1.0",
+  "description": "CLI companion for as_built — generate AI-powered documentation from your codebase",
+  "type": "module",
+  "bin": {
+    "asbuilt": "./dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "commander": "^13.1.0",
+    "firebase": "^12.9.0",
+    "ignore": "^7.0.5",
+    "open": "^10.1.0",
+    "ora": "^8.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "typescript": "^5"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "UNLICENSED"
+}

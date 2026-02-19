@@ -214,10 +214,15 @@ export async function savePrdContent(
   await adminDb.collection(COL).doc(scanId).update({ prdContent });
 }
 
-/** Writes final LLM outputs and marks the scan completed in a single write. */
+/**
+ * Writes final LLM outputs and marks the scan as completed (or partial).
+ * When status is "partial", the scan has salvaged output but some sections
+ * are missing — the user can re-run to try again (PRD §21).
+ */
 export async function saveScanOutputs(
   scanId: string,
-  payload: ScanOutputPayload
+  payload: ScanOutputPayload,
+  status: ScanStatus = "completed",
 ): Promise<void> {
   await adminDb
     .collection(COL)
@@ -229,7 +234,7 @@ export async function saveScanOutputs(
       fileCount: payload.fileCount,
       tokenUsage: payload.tokenUsage,
       ...(payload.projectName ? { projectName: payload.projectName } : {}),
-      status: "completed" as ScanStatus,
+      status,
       completedAt: FieldValue.serverTimestamp(),
     });
 }

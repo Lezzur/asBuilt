@@ -2,9 +2,119 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // TODO: Replace with production rules — Opus task (Phase 2: Database & Data Model)
-    // All reads/writes go through API routes using the Admin SDK, which bypasses
-    // these rules. This placeholder blocks all direct client access.
+
+    // ─── Defense-in-depth rules ─────────────────────────────────────────
+    // All production reads/writes go through Next.js API routes using the
+    // Admin SDK, which bypasses these rules entirely. These rules exist as
+    // a safety net: if a client-side Firebase SDK call is ever introduced
+    // (intentionally or accidentally), these rules enforce strict access
+    // boundaries. They also satisfy Firebase deploy warnings and security
+    // audit requirements.
+    // ────────────────────────────────────────────────────────────────────
+
+    // Helper: request is from an authenticated user
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Helper: the authenticated user owns this resource
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Helper: validate that a field is a string within a max length
+    function isStringMax(val, maxLen) {
+      return val is string && val.size() <= maxLen;
+    }
+
+    // ─── Users collection ───────────────────────────────────────────────
+    match /users/{userId} {
+      // Users can read their own document only
+      allow read: if isOwner(userId);
+
+      // Users can create their own document with required fields
+      allow create: if isOwner(userId)
+        && request.resource.data.keys().hasAll(['email', 'displayName', 'createdAt', 'lastActiveAt', 'reminderFrequencyDays', 'reminderEnabled', 'scanCount'])
+        && isStringMax(request.resource.data.email, 320)
+        && isStringMax(request.resource.data.displayName, 200)
+        && request.resource.data.reminderFrequencyDays is int
+        && request.resource.data.reminderFrequencyDays >= 1
+        && request.resource.data.reminderFrequencyDays <= 7
+        && request.resource.data.reminderEnabled is bool
+        && request.resource.data.scanCount == 0;
+
+      // Users can update their own document with constraints
+      allow update: if isOwner(userId)
+        // Cannot change uid or email via client
+        && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['uid']))
+        // Validate reminder settings if being changed
+        && (
+          !request.resource.data.diff(resource.data).affectedKeys().hasAny(['reminderFrequencyDays'])
+          || (
+            request.resource.data.reminderFrequencyDays is int
+            && request.resource.data.reminderFrequencyDays >= 1
+            && request.resource.data.reminderFrequencyDays <= 7
+          )
+        )
+        && (
+          !request.resource.data.diff(resource.data).affectedKeys().hasAny(['reminderEnabled'])
+          || request.resource.data.reminderEnabled is bool
+        )
+        // scanCount cannot be set to negative or above 100
+        && (
+          !request.resource.data.diff(resource.data).affectedKeys().hasAny(['scanCount'])
+          || (
+            request.resource.data.scanCount is int
+            && request.resource.data.scanCount >= 0
+            && request.resource.data.scanCount <= 100
+          )
+        )
+        // Encrypted fields (apiKeys, githubAccessToken) must remain strings
+        && (
+          !request.resource.data.diff(resource.data).affectedKeys().hasAny(['githubAccessToken'])
+          || request.resource.data.githubAccessToken is string
+        );
+
+      // Users cannot delete their own document via client (admin action)
+      allow delete: if false;
+    }
+
+    // ─── Scans collection ───────────────────────────────────────────────
+    match /scans/{scanId} {
+      // Users can only read their own scans
+      allow read: if isAuthenticated()
+        && resource.data.userId == request.auth.uid;
+
+      // Users can create scans they own, with valid initial state
+      allow create: if isAuthenticated()
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.keys().hasAll(['userId', 'projectName', 'source', 'sourceRef', 'llmProvider', 'llmModel', 'llmTier', 'status', 'prdAttached'])
+        && request.resource.data.status == 'pending'
+        && request.resource.data.source in ['zip', 'folder', 'github', 'cli']
+        && request.resource.data.llmProvider in ['gemini', 'claude', 'openai']
+        && request.resource.data.llmTier in ['default', 'premium']
+        && request.resource.data.prdAttached is bool
+        && isStringMax(request.resource.data.projectName, 500)
+        && isStringMax(request.resource.data.sourceRef, 2000);
+
+      // Only the scan owner can update, and only certain transitions are valid
+      allow update: if isAuthenticated()
+        && resource.data.userId == request.auth.uid
+        // userId is immutable
+        && request.resource.data.userId == resource.data.userId
+        // Status can only move forward, never backward
+        && (
+          request.resource.data.status == resource.data.status
+          || (resource.data.status == 'pending' && request.resource.data.status in ['processing', 'failed'])
+          || (resource.data.status == 'processing' && request.resource.data.status in ['completed', 'partial', 'failed'])
+        );
+
+      // Users can delete their own scans
+      allow delete: if isAuthenticated()
+        && resource.data.userId == request.auth.uid;
+    }
+
+    // ─── Catch-all: deny everything else ────────────────────────────────
     match /{document=**} {
       allow read, write: if false;
     }

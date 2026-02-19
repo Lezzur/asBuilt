@@ -7,7 +7,7 @@ import { useAuth } from "@/lib/auth/context";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, CheckCircle2, AlertCircle, ArrowRight } from "lucide-react";
+import { Loader2, CheckCircle2, AlertCircle, AlertTriangle, ArrowRight } from "lucide-react";
 import type { ScanRecord } from "@/lib/types";
 
 // Map log messages to a rough progress percentage
@@ -63,7 +63,7 @@ export default function ScanProcessingPage() {
       const data = (await res.json()) as { scan: Partial<ScanRecord> };
       setScan(data.scan);
 
-      if (data.scan.status === "completed" || data.scan.status === "failed") {
+      if (data.scan.status === "completed" || data.scan.status === "partial" || data.scan.status === "failed") {
         if (pollRef.current) clearInterval(pollRef.current);
       }
     } catch (err) {
@@ -98,9 +98,10 @@ export default function ScanProcessingPage() {
 
   const logs = scan?.progressLog ?? [];
   const status = scan?.status ?? "pending";
-  const progress = status === "completed" ? 100 : estimateProgress(logs);
+  const progress = status === "completed" || status === "partial" ? 100 : estimateProgress(logs);
   const isFailed = status === "failed";
   const isComplete = status === "completed";
+  const isPartial = status === "partial";
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4">
@@ -110,9 +111,11 @@ export default function ScanProcessingPage() {
           <h1 className="text-lg font-semibold mb-1">
             {isComplete
               ? "Scan complete"
-              : isFailed
-                ? "Scan failed"
-                : "Scanning your codebase…"}
+              : isPartial
+                ? "Scan partially complete"
+                : isFailed
+                  ? "Scan failed"
+                  : "Scanning your codebase…"}
           </h1>
           {scan?.projectName && (
             <p className="text-sm text-muted-foreground">{scan.projectName}</p>
@@ -138,7 +141,7 @@ export default function ScanProcessingPage() {
         </div>
 
         {/* Status / actions */}
-        {!isComplete && !isFailed && (
+        {!isComplete && !isPartial && !isFailed && (
           <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
             <Loader2 className="h-4 w-4 animate-spin" />
             <span>This can take 30–120 seconds depending on codebase size.</span>
@@ -157,6 +160,26 @@ export default function ScanProcessingPage() {
                 <ArrowRight className="h-4 w-4 ml-1.5" />
               </Link>
             </Button>
+          </div>
+        )}
+
+        {isPartial && (
+          <div className="flex flex-col items-center gap-3">
+            <div className="flex items-center gap-2 text-amber-600 font-medium text-sm">
+              <AlertTriangle className="h-5 w-5" />
+              Partial results saved — some sections may be incomplete
+            </div>
+            <div className="flex gap-2">
+              <Button asChild size="lg">
+                <Link href={`/scan/${scanId}`}>
+                  View Partial Results
+                  <ArrowRight className="h-4 w-4 ml-1.5" />
+                </Link>
+              </Button>
+              <Button asChild size="lg" variant="outline">
+                <Link href="/scan/new">Re-run Scan</Link>
+              </Button>
+            </div>
           </div>
         )}
 

@@ -23,6 +23,7 @@ import {
   ExternalLink,
   Clock,
   AlertCircle,
+  AlertTriangle,
   CheckCircle2,
   Loader2,
 } from "lucide-react";
@@ -43,6 +44,11 @@ const STATUS_CONFIG = {
     label: "Processing",
     icon: Loader2,
     className: "text-blue-600 animate-spin",
+  },
+  partial: {
+    label: "Partial",
+    icon: AlertTriangle,
+    className: "text-amber-600",
   },
   pending: {
     label: "Pending",
@@ -112,7 +118,7 @@ function ScanRow({
       </div>
 
       <div className="flex items-center gap-1">
-        {scan.status === "completed" && (
+        {(scan.status === "completed" || scan.status === "partial") && (
           <Button asChild size="sm" variant="ghost" className="h-8 px-2">
             <Link href={`/scan/${scan.scanId}`}>
               <ExternalLink className="h-3.5 w-3.5" />
@@ -134,7 +140,7 @@ function ScanRow({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            {scan.status === "completed" && (
+            {(scan.status === "completed" || scan.status === "partial") && (
               <DropdownMenuItem asChild>
                 <Link
                   href={`/scan/${scan.scanId}`}

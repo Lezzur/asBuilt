@@ -40,7 +40,7 @@ export const GET = withAuth<RouteContext>(async (request, user, context) => {
   if (scan.userId !== user.uid) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
-  if (scan.status !== "completed") {
+  if (scan.status !== "completed" && scan.status !== "partial") {
     return NextResponse.json(
       { error: "Scan outputs are not yet available" },
       { status: 409 }
