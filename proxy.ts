@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { authMiddleware } from "@/lib/auth/middleware";
-// Edge middleware — runs at the edge, not in Node.js runtime
+// Edge proxy — runs at the edge, not in Node.js runtime
 
-export function middleware(request: NextRequest): NextResponse | undefined {
+export function proxy(request: NextRequest): NextResponse | undefined {
   return authMiddleware(request);
 }
 
