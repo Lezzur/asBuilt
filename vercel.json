@@ -11,6 +11,9 @@
     },
     "app/api/scan/cli/route.ts": {
       "maxDuration": 300
+    },
+    "app/api/scan/[id]/download/[type]/route.ts": {
+      "maxDuration": 60
     }
   }
 }
