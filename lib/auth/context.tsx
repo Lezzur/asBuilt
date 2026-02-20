@@ -81,6 +81,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
         const idToken = await credential.user.getIdToken();
         setSessionCookie(idToken);
+
+        // Create the Firestore user document so downstream features
+        // (settings, GitHub OAuth, scans) can find the user record.
+        await fetch("/api/auth/register", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${idToken}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ displayName: displayName ?? "" }),
+        });
+
         setUser(mapFirebaseUser(credential.user));
       } catch (err) {
         const message =

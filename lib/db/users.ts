@@ -60,7 +60,7 @@ export async function updateLastActive(uid: string): Promise<void> {
   await adminDb
     .collection(COL)
     .doc(uid)
-    .update({ lastActiveAt: FieldValue.serverTimestamp() });
+    .set({ lastActiveAt: FieldValue.serverTimestamp() }, { merge: true });
 }
 
 export async function updateUserSettings(

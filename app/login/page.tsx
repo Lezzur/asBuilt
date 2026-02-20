@@ -36,8 +36,10 @@ export default function LoginPage() {
       router.push("/");
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Authentication failed";
-      // Clean up Firebase error messages
-      setError(msg.replace("Firebase: ", "").replace(/\(auth\/.*\)\.?/, "").trim());
+      // Extract readable message from Firebase errors, falling back to the error code
+      const codeMatch = msg.match(/\(auth\/([^)]+)\)/);
+      const cleaned = msg.replace("Firebase: ", "").replace(/\s*\(auth\/[^)]+\)\.?/, "").trim();
+      setError(cleaned === "Error" && codeMatch ? codeMatch[1].replace(/-/g, " ") : cleaned);
     } finally {
       setLoading(false);
     }

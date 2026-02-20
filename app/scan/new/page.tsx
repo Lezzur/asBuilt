@@ -158,8 +158,8 @@ export default function NewScanPage() {
       }
     } else if (activeTab === "github") {
       formData.append("source", "github");
-      formData.append("repoUrl", repoUrl.trim());
-      if (branch.trim()) formData.append("branch", branch.trim());
+      formData.append("githubUrl", repoUrl.trim());
+      if (branch.trim()) formData.append("githubBranch", branch.trim());
     }
 
     try {
