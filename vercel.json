@@ -4,16 +4,5 @@
       "path": "/api/cron/reminders",
       "schedule": "0 9 * * *"
     }
-  ],
-  "functions": {
-    "api/scan/route.ts": {
-      "maxDuration": 300
-    },
-    "api/scan/cli/route.ts": {
-      "maxDuration": 300
-    },
-    "api/scan/[id]/download/[type]/route.ts": {
-      "maxDuration": 60
-    }
-  }
+  ]
 }
