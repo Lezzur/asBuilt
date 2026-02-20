@@ -5,7 +5,7 @@ import type { UserSettings } from "@/lib/types";
 
 const VALID_FREQUENCIES = [1, 2, 3, 5, 7] as const;
 
-/** GET /api/user/settings — returns the current user's reminder settings. */
+/** GET /api/user/settings — returns the current user's settings + GitHub status. */
 export const GET = withAuth<object>(async (request, user) => {
   const userData = await getUser(user.uid);
   if (!userData) {
@@ -17,7 +17,10 @@ export const GET = withAuth<object>(async (request, user) => {
     reminderFrequencyDays: userData.reminderFrequencyDays,
   };
 
-  return NextResponse.json(settings);
+  return NextResponse.json({
+    settings,
+    githubConnected: !!userData.githubAccessToken,
+  });
 });
 
 /**
