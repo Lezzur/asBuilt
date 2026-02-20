@@ -52,10 +52,6 @@ import type { FolderFileEntry } from "@/lib/input/types";
 // Locally there is no limit.
 export const maxDuration = 300;
 
-// Accept up to 100 MB uploads (PRD §23)
-export const config = {
-  api: { bodyParser: false },
-};
 
 // ─── Validation helpers ─────────────────────────────────────────────────────
 

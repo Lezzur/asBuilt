@@ -13,7 +13,7 @@
  * to prevent token exfiltration to arbitrary hosts.
  */
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/auth/context";
 import { getClientAuth } from "@/lib/firebase";
@@ -44,7 +44,7 @@ function isLocalhostCallback(url: string): boolean {
   }
 }
 
-export default function CliAuthPage() {
+function CliAuthContent() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callback");
   const { user, signInWithEmail, signUpWithEmail } = useAuth();
@@ -322,5 +322,13 @@ export default function CliAuthPage() {
         </Card>
       </div>
     </div>
+  );
+}
+
+export default function CliAuthPage() {
+  return (
+    <Suspense>
+      <CliAuthContent />
+    </Suspense>
   );
 }
