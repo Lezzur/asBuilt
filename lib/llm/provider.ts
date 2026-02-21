@@ -13,8 +13,8 @@ interface ModelConfig {
 
 const MODEL_MAP: Record<LlmProvider, ModelConfig> = {
   gemini: {
-    default: "gemini-2.5-flash-preview-05-20",
-    premium: "gemini-2.5-pro-preview-05-06",
+    default: "gemini-2.5-flash",
+    premium: "gemini-3.1-pro-preview",
   },
   claude: {
     default: "claude-sonnet-4-5-20250514",

@@ -62,6 +62,7 @@ export default function NewScanPage() {
   // GitHub state
   const [repoUrl, setRepoUrl] = useState("");
   const [branch, setBranch] = useState("");
+  const [githubConnected, setGithubConnected] = useState(false);
 
   // PRD upload state
   const [prdFile, setPrdFile] = useState<File | null>(null);
@@ -72,6 +73,23 @@ export default function NewScanPage() {
       router.push("/login");
     }
   }, [authLoading, user, router]);
+
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      const token = await getIdToken();
+      if (!token) return;
+      try {
+        const res = await fetch("/api/user/settings", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (res.ok) {
+          const data = (await res.json()) as { githubConnected?: boolean };
+          setGithubConnected(data.githubConnected ?? false);
+        }
+      } catch { /* non-critical */ }
+    })();
+  }, [user, getIdToken]);
 
   const MAX_UPLOAD_BYTES = 100 * 1024 * 1024; // 100 MB
 
@@ -169,7 +187,13 @@ export default function NewScanPage() {
         body: formData,
       });
 
-      const data = (await res.json()) as { scanId?: string; error?: string; code?: string };
+      let data: { scanId?: string; error?: string; code?: string };
+      try {
+        data = (await res.json()) as { scanId?: string; error?: string; code?: string };
+      } catch {
+        setError(`Server error (${res.status}). Please try again.`);
+        return;
+      }
 
       if (!res.ok) {
         setError(data.error ?? "Failed to start scan.");
@@ -318,16 +342,24 @@ export default function NewScanPage() {
                       onChange={(e) => setBranch(e.target.value)}
                     />
                   </div>
-                  <Alert>
-                    <Info className="h-4 w-4" />
-                    <AlertDescription className="text-xs">
-                      Connect your GitHub account in{" "}
-                      <a href="/settings" className="underline">
-                        Settings
-                      </a>{" "}
-                      to access private repositories.
-                    </AlertDescription>
-                  </Alert>
+                  {githubConnected ? (
+                    <Alert>
+                      <ShieldCheck className="h-4 w-4 text-green-600" />
+                      <AlertDescription className="text-xs">
+                        GitHub connected — public and private repositories are accessible.
+                      </AlertDescription>
+                    </Alert>
+                  ) : (
+                    <Alert variant="destructive">
+                      <AlertCircle className="h-4 w-4" />
+                      <AlertDescription className="text-xs">
+                        GitHub not connected. Private repos won&apos;t be accessible.{" "}
+                        <a href="/settings" className="underline font-medium">
+                          Connect in Settings
+                        </a>
+                      </AlertDescription>
+                    </Alert>
+                  )}
                 </TabsContent>
               </Tabs>
             </CardContent>

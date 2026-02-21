@@ -95,7 +95,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   const source = formData.get("source") as string | null;
   const provider = formData.get("provider") as string | null;
   const tier = (formData.get("tier") as string | null) ?? "default";
-  const projectName = (formData.get("projectName") as string | null) ?? "Untitled Project";
+  let projectName = (formData.get("projectName") as string | null)?.trim() || null;
   const subdirectory = (formData.get("subdirectory") as string | null) || null;
   const githubUrl = formData.get("githubUrl") as string | null;
   const githubBranch = (formData.get("githubBranch") as string | null) || undefined;
@@ -164,6 +164,24 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
   // ── 3. Create scan record ──
   const llmModel = getModelId(provider, tier as LlmTier);
+
+  // Infer project name from source if not provided
+  if (!projectName) {
+    if (source === "github" && githubUrl) {
+      // Extract "repo" from "https://github.com/owner/repo"
+      const segments = githubUrl.replace(/\/+$/, "").split("/").filter(Boolean);
+      projectName = segments[segments.length - 1]?.replace(/\.git$/, "") || "Untitled Project";
+    } else if (source === "zip") {
+      const zipFile = formData.get("file") as File | null;
+      projectName = zipFile?.name.replace(/\.zip$/i, "") || "Untitled Project";
+    } else if (source === "folder") {
+      const files = formData.getAll("files") as File[];
+      const firstPath = files[0]?.webkitRelativePath || files[0]?.name || "";
+      projectName = firstPath.split("/")[0] || "Untitled Project";
+    } else {
+      projectName = "Untitled Project";
+    }
+  }
 
   // Determine sourceRef for the record
   let sourceRef = "";
@@ -261,8 +279,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     // Map known error types to user-friendly messages
     const errorResponse = mapInputError(err);
-    const { updateScanStatus } = await import("@/lib/db/scans");
-    await updateScanStatus(scanId, "failed", errorResponse.message);
+    try {
+      const { updateScanStatus } = await import("@/lib/db/scans");
+      await updateScanStatus(scanId, "failed", errorResponse.message);
+    } catch { /* best-effort status update */ }
 
     return NextResponse.json(
       { error: errorResponse.message, code: errorResponse.code, scanId },

@@ -18,7 +18,7 @@ export const GET = withAuth<RouteContext>(async (request, user, context) => {
   }
 
   await updateLastActive(user.uid);
-  return NextResponse.json(scan);
+  return NextResponse.json({ scan });
 });
 
 /** DELETE /api/scan/[id] — permanently removes a scan record. */
