@@ -20,7 +20,7 @@
  * on LLM processing.
  */
 
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse, after } from "next/server";
 import { verifyAuthToken } from "@/lib/auth/server";
 import { createScan } from "@/lib/db/scans";
 import { savePrdContent } from "@/lib/db/scans";
@@ -291,29 +291,21 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   }
 
   // ── 5. Fire background processing (non-blocking) ──
-  // The background function runs asynchronously. We use waitUntil pattern
-  // on Vercel to keep the function alive after returning the response.
-  // For local dev, this runs as a fire-and-forget promise.
-  const backgroundPromise = runBackgroundScan(scanId, user.uid, source, {
-    projectName,
-    provider,
-    tier: tier as LlmTier,
-    subdirectory,
-    prdAttached,
-  });
-
-  // On Vercel, waitUntil keeps the function running after response is sent.
-  // In local dev, it's just a dangling promise (acceptable for dev).
-  const g = globalThis as Record<string, unknown>;
-  if (typeof g.waitUntil === "function") {
-    // Vercel runtime provides waitUntil on the global scope
-    (g.waitUntil as (p: Promise<unknown>) => void)(backgroundPromise);
-  } else {
-    // Local dev: catch errors so unhandled rejection doesn't crash
-    backgroundPromise.catch((err) => {
+  // Schedule the scan to run after the response is sent using Next.js after().
+  // This keeps the serverless function alive on Vercel while the LLM processes.
+  after(async () => {
+    try {
+      await runBackgroundScan(scanId, user.uid, source, {
+        projectName,
+        provider,
+        tier: tier as LlmTier,
+        subdirectory,
+        prdAttached,
+      });
+    } catch (err) {
       console.error("[POST /api/scan] Background processing error:", err);
-    });
-  }
+    }
+  });
 
   // ── 6. Return scan ID immediately ──
   return NextResponse.json(

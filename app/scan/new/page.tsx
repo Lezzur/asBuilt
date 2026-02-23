@@ -29,6 +29,7 @@ import {
   AlertCircle,
   Info,
   ShieldCheck,
+  ChevronDown,
 } from "lucide-react";
 import type { LlmProvider } from "@/lib/types";
 
@@ -365,119 +366,127 @@ export default function NewScanPage() {
             </CardContent>
           </Card>
 
-          {/* Options */}
+          {/* Options (collapsible) */}
           <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base">Scan Options</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {/* Subdirectory */}
-              <div className="space-y-1.5">
-                <Label htmlFor="subdirectory">
-                  Subdirectory{" "}
-                  <span className="text-muted-foreground font-normal">(optional)</span>
-                </Label>
-                <Input
-                  id="subdirectory"
-                  placeholder="packages/api"
-                  value={subdirectory}
-                  onChange={(e) => setSubdirectory(e.target.value)}
-                />
-                <p className="text-xs text-muted-foreground">
-                  Scan only a specific subdirectory. Useful for monorepos.
-                </p>
-              </div>
-
-              <Separator />
-
-              {/* Provider */}
-              <div className="space-y-1.5">
-                <Label>LLM Provider</Label>
-                <Select
-                  value={provider}
-                  onValueChange={(v) => setProvider(v as LlmProvider)}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {PROVIDERS.map((p) => (
-                      <SelectItem key={p.value} value={p.value}>
-                        <div>
-                          <span>{p.label}</span>
-                          <span className="text-xs text-muted-foreground ml-2">
-                            — {p.description}
-                          </span>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Premium tier */}
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="text-sm font-medium flex items-center gap-2">
-                    Premium tier
-                    <Badge variant="outline" className="text-xs font-normal">
-                      Opus-class
-                    </Badge>
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    Deeper analysis for complex codebases. Uses more API credits.
+            <details>
+              <summary className="flex items-center justify-between cursor-pointer px-6 py-4 [&>svg]:open:rotate-180">
+                <span className="text-base font-semibold">Scan Options</span>
+                <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200" />
+              </summary>
+              <CardContent className="pt-0 space-y-4">
+                {/* Subdirectory */}
+                <div className="space-y-1.5">
+                  <Label htmlFor="subdirectory">
+                    Subdirectory{" "}
+                    <span className="text-muted-foreground font-normal">(optional)</span>
+                  </Label>
+                  <Input
+                    id="subdirectory"
+                    placeholder="packages/api"
+                    value={subdirectory}
+                    onChange={(e) => setSubdirectory(e.target.value)}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Scan only a specific subdirectory. Useful for monorepos.
                   </p>
                 </div>
-                <Switch
-                  checked={premium}
-                  onCheckedChange={setPremium}
-                />
-              </div>
-            </CardContent>
-          </Card>
 
-          {/* PRD upload */}
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base">PRD Upload</CardTitle>
-              <CardDescription>
-                Optionally attach your original PRD to generate a drift analysis.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div
-                className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:border-primary/50 hover:bg-accent/30 transition-colors"
-                onClick={() => prdInputRef.current?.click()}
-              >
-                <FileText className="h-6 w-6 text-muted-foreground mx-auto mb-2" />
-                {prdFile ? (
+                <Separator />
+
+                {/* Provider */}
+                <div className="space-y-1.5">
+                  <Label>LLM Provider</Label>
+                  <Select
+                    value={provider}
+                    onValueChange={(v) => setProvider(v as LlmProvider)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {PROVIDERS.map((p) => (
+                        <SelectItem key={p.value} value={p.value}>
+                          <div>
+                            <span>{p.label}</span>
+                            <span className="text-xs text-muted-foreground ml-2">
+                              — {p.description}
+                            </span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Premium tier */}
+                <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium">{prdFile.name}</p>
-                    <button
-                      type="button"
-                      onClick={(e) => { e.stopPropagation(); setPrdFile(null); }}
-                      className="text-xs text-muted-foreground hover:text-destructive mt-0.5"
-                    >
-                      Remove
-                    </button>
-                  </div>
-                ) : (
-                  <div>
-                    <p className="text-sm">Click to attach a PRD file</p>
+                    <div className="text-sm font-medium flex items-center gap-2">
+                      Premium tier
+                      <Badge variant="outline" className="text-xs font-normal">
+                        Opus-class
+                      </Badge>
+                    </div>
                     <p className="text-xs text-muted-foreground mt-0.5">
-                      .md, .txt, .pdf, or .docx
+                      Deeper analysis for complex codebases. Uses more API credits.
                     </p>
                   </div>
-                )}
-                <input
-                  ref={prdInputRef}
-                  type="file"
-                  accept=".md,.txt,.pdf,.docx"
-                  className="hidden"
-                  onChange={(e) => setPrdFile(e.target.files?.[0] ?? null)}
-                />
-              </div>
-            </CardContent>
+                  <Switch
+                    checked={premium}
+                    onCheckedChange={setPremium}
+                  />
+                </div>
+              </CardContent>
+            </details>
+          </Card>
+
+          {/* PRD upload (collapsible) */}
+          <Card>
+            <details>
+              <summary className="flex items-center justify-between cursor-pointer px-6 py-4 [&>svg]:open:rotate-180">
+                <div>
+                  <span className="text-base font-semibold">PRD Upload</span>
+                  <p className="text-sm text-muted-foreground font-normal mt-0.5">
+                    Optionally attach your original PRD to generate a drift analysis.
+                  </p>
+                </div>
+                <ChevronDown className="h-4 w-4 text-muted-foreground shrink-0 transition-transform duration-200" />
+              </summary>
+              <CardContent className="pt-0">
+                <div
+                  className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:border-primary/50 hover:bg-accent/30 transition-colors"
+                  onClick={() => prdInputRef.current?.click()}
+                >
+                  <FileText className="h-6 w-6 text-muted-foreground mx-auto mb-2" />
+                  {prdFile ? (
+                    <div>
+                      <p className="text-sm font-medium">{prdFile.name}</p>
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); setPrdFile(null); }}
+                        className="text-xs text-muted-foreground hover:text-destructive mt-0.5"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ) : (
+                    <div>
+                      <p className="text-sm">Click to attach a PRD file</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        .md, .txt, .pdf, or .docx
+                      </p>
+                    </div>
+                  )}
+                  <input
+                    ref={prdInputRef}
+                    type="file"
+                    accept=".md,.txt,.pdf,.docx"
+                    className="hidden"
+                    onChange={(e) => setPrdFile(e.target.files?.[0] ?? null)}
+                  />
+                </div>
+              </CardContent>
+            </details>
           </Card>
 
           {error && (

@@ -7,7 +7,7 @@ import { useAuth } from "@/lib/auth/context";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, CheckCircle2, AlertCircle, AlertTriangle, ArrowRight } from "lucide-react";
+import { Loader2, CheckCircle2, AlertCircle, AlertTriangle, ArrowRight, ArrowLeft } from "lucide-react";
 import type { ScanRecord } from "@/lib/types";
 
 // Map log messages to a rough progress percentage
@@ -106,6 +106,13 @@ export default function ScanProcessingPage() {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4">
       <div className="w-full max-w-xl">
+        <Button asChild variant="ghost" size="sm" className="mb-4 -ml-2">
+          <Link href="/">
+            <ArrowLeft className="h-4 w-4 mr-1" />
+            Dashboard
+          </Link>
+        </Button>
+
         {/* Header */}
         <div className="mb-6 text-center">
           <h1 className="text-lg font-semibold mb-1">
