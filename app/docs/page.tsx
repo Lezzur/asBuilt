@@ -196,7 +196,7 @@ asbuilt logout                          # Clear credentials`}</CodeBlock>
 asbuilt scan .
 
 # Then reference the output:
-# User: "Read AS_BUILT_AGENT.md and use it as context."
+# User: "Read PROJECT_MANIFEST and use it as context."
 `}</CodeBlock>
 
               <h3 className="font-medium">CLI Troubleshooting</h3>
@@ -257,7 +257,7 @@ asbuilt scan .
             <div className="space-y-5">
               <div>
                 <div className="flex items-center gap-2 mb-1.5">
-                  <h3 className="font-medium">AS_BUILT_AGENT.md</h3>
+                  <h3 className="font-medium">PROJECT_MANIFEST</h3>
                   <Badge variant="outline" className="text-xs">AI-optimized</Badge>
                 </div>
                 <p>

@@ -4,11 +4,11 @@ Your COMPLETE response must use these EXACT delimiters to separate the output do
 
 Structure your ENTIRE response exactly like this:
 
-===BEGIN_AGENT_OUTPUT===
-(The complete AS_BUILT_AGENT.md document goes here.
-Include all sections from §1 through §13.
+===BEGIN_MANIFEST_OUTPUT===
+(The complete PROJECT_MANIFEST document goes here.
+Include all sections from §1 through §16.
 Do not truncate or summarize — write the full document.)
-===END_AGENT_OUTPUT===
+===END_MANIFEST_OUTPUT===
 
 ===BEGIN_HUMAN_OUTPUT===
 (The complete AS_BUILT_HUMAN.md document goes here.
@@ -19,9 +19,9 @@ Do not truncate or summarize — write the full document.)
 {drift_section}
 
 RULES:
-1. Start your response IMMEDIATELY with ===BEGIN_AGENT_OUTPUT===. No preamble, no "Here is the output", no commentary before the first delimiter.
+1. Start your response IMMEDIATELY with ===BEGIN_MANIFEST_OUTPUT===. No preamble, no "Here is the output", no commentary before the first delimiter.
 2. Each delimiter must appear on its OWN line with NO surrounding whitespace or markdown formatting.
 3. The content between delimiters must be the COMPLETE document — do not refer to other sections or say "see above".
-4. Do NOT add any text between ===END_AGENT_OUTPUT=== and ===BEGIN_HUMAN_OUTPUT===.
+4. Do NOT add any text between ===END_MANIFEST_OUTPUT=== and ===BEGIN_HUMAN_OUTPUT===.
 5. Do NOT add any text after the final closing delimiter.
 6. Both documents analyze the SAME codebase but serve DIFFERENT audiences and DIFFERENT purposes. They are not summaries of each other.

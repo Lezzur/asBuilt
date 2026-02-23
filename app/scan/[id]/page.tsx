@@ -24,7 +24,7 @@ import {
 } from "lucide-react";
 import type { ScanRecord } from "@/lib/types";
 
-type DownloadType = "agent-md" | "human-md" | "human-pdf" | "drift-md";
+type DownloadType = "manifest-md" | "agent-md" | "human-md" | "human-pdf" | "drift-md";
 
 const PROVIDER_LABELS: Record<string, string> = {
   gemini: "Google Gemini",
@@ -123,8 +123,8 @@ export default function ScanDetailPage() {
       const a = document.createElement("a");
       a.href = url;
       const ext = type === "human-pdf" ? "pdf" : "md";
-      const name = type === "agent-md"
-        ? "AS_BUILT_AGENT.md"
+      const name = type === "manifest-md"
+        ? "PROJECT_MANIFEST.md"
         : type === "human-md"
           ? "AS_BUILT_HUMAN.md"
           : type === "human-pdf"
@@ -165,11 +165,11 @@ export default function ScanDetailPage() {
 
   const outputs: { type: DownloadType; title: string; description: string; icon: React.ElementType; available: boolean }[] = [
     {
-      type: "agent-md",
-      title: "AS_BUILT_AGENT.md",
+      type: "manifest-md",
+      title: "PROJECT_MANIFEST.md",
       description: "Dense technical reference optimized for AI coding assistants.",
       icon: Bot,
-      available: !!scan.outputAgentMd,
+      available: !!scan.outputManifestMd,
     },
     {
       type: "human-md",

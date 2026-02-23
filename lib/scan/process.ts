@@ -252,14 +252,14 @@ export async function processScan(input: ProcessScanInput): Promise<void> {
     // ── Step 5: Handle drift analysis fallback ──
     // If PRD was attached but drift section is missing, run a dedicated drift call
     let driftMd = parsed.driftMd;
-    if (expectDrift && !driftMd && parsed.agentMd) {
+    if (expectDrift && !driftMd && parsed.manifestMd) {
       await log(scanId, "Drift section missing. Running dedicated drift analysis...");
 
       try {
         const driftPrompt = buildDriftPrompt({
           projectName,
           prdContent: prdContent!,
-          agentMd: parsed.agentMd,
+          agentMd: parsed.manifestMd,
           tree,
         });
 
@@ -286,8 +286,8 @@ export async function processScan(input: ProcessScanInput): Promise<void> {
       }
     }
 
-    if (parsed.agentMd) {
-      await log(scanId, "Generating AS_BUILT_AGENT.md...");
+    if (parsed.manifestMd) {
+      await log(scanId, "Generating PROJECT_MANIFEST...");
     }
     if (parsed.humanMd) {
       await log(scanId, "Generating AS_BUILT_HUMAN.md...");
@@ -304,7 +304,7 @@ export async function processScan(input: ProcessScanInput): Promise<void> {
 
     if (isPartial) {
       const missing: string[] = [];
-      if (!parsed.agentMd) missing.push("AS_BUILT_AGENT.md");
+      if (!parsed.manifestMd) missing.push("PROJECT_MANIFEST");
       if (!parsed.humanMd) missing.push("AS_BUILT_HUMAN.md");
       if (expectDrift && !driftMd) missing.push("PRD_DRIFT.md");
 
@@ -320,7 +320,7 @@ export async function processScan(input: ProcessScanInput): Promise<void> {
 
     // ── Step 7: Save results ──
     const payload: ScanOutputPayload = {
-      outputAgentMd: parsed.agentMd,
+      outputManifestMd: parsed.manifestMd,
       outputHumanMd: parsed.humanMd,
       outputDriftMd: driftMd ?? null,
       projectName,

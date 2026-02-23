@@ -54,7 +54,7 @@ export interface ScanRecord {
   status: ScanStatus;
   /** Live log messages written by the background function. */
   progressLog: string[];
-  outputAgentMd: string;
+  outputManifestMd: string;
   outputHumanMd: string;
   outputDriftMd: string | null;
   prdAttached: boolean;
@@ -73,7 +73,7 @@ export interface ScanRecord {
  */
 export type ScanSummary = Omit<
   ScanRecord,
-  "outputAgentMd" | "outputHumanMd" | "outputDriftMd" | "prdContent"
+  "outputManifestMd" | "outputHumanMd" | "outputDriftMd" | "prdContent"
 >;
 
 // ─── Input types ──────────────────────────────────────────────────────────────
@@ -94,7 +94,7 @@ export type CreateScanInput = Pick<
 
 /** Payload written by the background function when the scan finishes. */
 export interface ScanOutputPayload {
-  outputAgentMd: string;
+  outputManifestMd: string;
   outputHumanMd: string;
   outputDriftMd?: string | null;
   /** Final inferred project name (may differ from initial placeholder). */

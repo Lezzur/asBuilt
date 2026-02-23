@@ -51,7 +51,7 @@ Run as_built directly from Claude Code or Cursor:
 asbuilt scan .
 
 # Then reference the output:
-# User: "Read AS_BUILT_AGENT.md and use it as context."
+# User: "Read PROJECT_MANIFEST and use it as context."
 ```
 
 ## CLI Troubleshooting

@@ -3,10 +3,10 @@ import { withAuth } from "@/lib/auth/server";
 import { getScan } from "@/lib/db/scans";
 import { generatePdf } from "@/lib/pdf/generate";
 
-type DownloadType = "agent-md" | "human-md" | "human-pdf" | "drift-md";
+type DownloadType = "manifest-md" | "agent-md" | "human-md" | "human-pdf" | "drift-md";
 type RouteContext = { params: Promise<{ id: string; type: string }> };
 
-const VALID_TYPES: DownloadType[] = ["agent-md", "human-md", "human-pdf", "drift-md"];
+const VALID_TYPES: DownloadType[] = ["manifest-md", "agent-md", "human-md", "human-pdf", "drift-md"];
 
 function isValidType(value: string): value is DownloadType {
   return VALID_TYPES.includes(value as DownloadType);
@@ -18,10 +18,11 @@ function isValidType(value: string): value is DownloadType {
  * Streams the requested output as a downloadable file.
  *
  * type values:
- *   agent-md  → AS_BUILT_AGENT.md  (text/markdown)
- *   human-md  → AS_BUILT_HUMAN.md  (text/markdown)
- *   human-pdf → AS_BUILT_HUMAN.pdf (application/pdf)
- *   drift-md  → PRD_DRIFT.md       (text/markdown, only if PRD was attached)
+ *   manifest-md → PROJECT_MANIFEST_<slug>.md (text/markdown)
+ *   agent-md    → alias for manifest-md (backward compat)
+ *   human-md    → AS_BUILT_HUMAN.md  (text/markdown)
+ *   human-pdf   → AS_BUILT_HUMAN.pdf (application/pdf)
+ *   drift-md    → PRD_DRIFT.md       (text/markdown, only if PRD was attached)
  */
 export const GET = withAuth<RouteContext>(async (request, user, context) => {
   const { id, type } = await context.params;
@@ -50,11 +51,12 @@ export const GET = withAuth<RouteContext>(async (request, user, context) => {
   const slug = scan.projectName.replace(/[^a-z0-9]+/gi, "_").toLowerCase();
 
   switch (type) {
+    case "manifest-md":
     case "agent-md": {
-      return new NextResponse(scan.outputAgentMd, {
+      return new NextResponse(scan.outputManifestMd, {
         headers: {
           "Content-Type": "text/markdown; charset=utf-8",
-          "Content-Disposition": `attachment; filename="${slug}_AS_BUILT_AGENT.md"`,
+          "Content-Disposition": `attachment; filename="PROJECT_MANIFEST_${slug}.md"`,
         },
       });
     }

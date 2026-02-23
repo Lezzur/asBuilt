@@ -9,7 +9,7 @@ Core principles:
 
 ## Drift Analysis Instructions
 
-Systematically compare every requirement in the PRD against the codebase analysis (AS_BUILT_AGENT.md). Produce a structured PRD_DRIFT.md report.
+Systematically compare every requirement in the PRD against the codebase analysis (PROJECT_MANIFEST). Produce a structured PRD_DRIFT.md report.
 
 ### Analysis Methodology
 

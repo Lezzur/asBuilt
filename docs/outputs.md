@@ -1,8 +1,8 @@
 # Understanding Outputs
 
-## AS_BUILT_AGENT.md (AI-optimized)
+## PROJECT_MANIFEST (AI-optimized)
 
-A dense, technically precise document for AI coding assistants. Contains file paths, function signatures, data shapes, config keys, env vars, and component relationships. Feed this to Claude Code, Cursor, or any AI assistant before starting work on a project.
+A dense, technically precise document for AI coding assistants following the baryapps standard manifest format. Contains file paths, function signatures, data shapes, config keys, env vars, and component relationships. Feed this to Claude Code, Cursor, or any AI assistant before starting work on a project.
 
 ## AS_BUILT_HUMAN.md / .pdf (Human-readable)
 

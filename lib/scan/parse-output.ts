@@ -1,7 +1,7 @@
 // ─── Types ───────────────────────────────────────────────────────────────────
 
 export interface ParsedOutput {
-  agentMd: string;
+  manifestMd: string;
   humanMd: string;
   driftMd: string | null;
   /** Whether the output was only partially parsed (some sections missing). */
@@ -17,9 +17,9 @@ export interface ParsedOutput {
 // ─── Delimiters (must match prompt.ts) ───────────────────────────────────────
 
 const DELIMITERS = {
-  agent: {
-    start: "===BEGIN_AGENT_OUTPUT===",
-    end: "===END_AGENT_OUTPUT===",
+  manifest: {
+    start: "===BEGIN_MANIFEST_OUTPUT===",
+    end: "===END_MANIFEST_OUTPUT===",
   },
   human: {
     start: "===BEGIN_HUMAN_OUTPUT===",
@@ -67,27 +67,27 @@ function extractSection(
  * extract sections by looking for the document headers we asked for.
  */
 function extractByHeaders(text: string): {
-  agent: string | null;
+  manifest: string | null;
   human: string | null;
   drift: string | null;
 } {
-  const agentHeaderPattern = /^#\s+AS_BUILT_AGENT\.md/m;
+  const manifestHeaderPattern = /^#\s+PROJECT_MANIFEST_/m;
   const humanHeaderPattern = /^#\s+AS_BUILT_HUMAN\.md/m;
   const driftHeaderPattern = /^#\s+PRD_DRIFT\.md/m;
 
-  const agentMatch = agentHeaderPattern.exec(text);
+  const manifestMatch = manifestHeaderPattern.exec(text);
   const humanMatch = humanHeaderPattern.exec(text);
   const driftMatch = driftHeaderPattern.exec(text);
 
   // Build a sorted list of all found section start positions
-  const sections: { type: "agent" | "human" | "drift"; start: number }[] = [];
-  if (agentMatch) sections.push({ type: "agent", start: agentMatch.index });
+  const sections: { type: "manifest" | "human" | "drift"; start: number }[] = [];
+  if (manifestMatch) sections.push({ type: "manifest", start: manifestMatch.index });
   if (humanMatch) sections.push({ type: "human", start: humanMatch.index });
   if (driftMatch) sections.push({ type: "drift", start: driftMatch.index });
   sections.sort((a, b) => a.start - b.start);
 
   const result: Record<string, string | null> = {
-    agent: null,
+    manifest: null,
     human: null,
     drift: null,
   };
@@ -99,7 +99,7 @@ function extractByHeaders(text: string): {
   }
 
   return {
-    agent: result.agent,
+    manifest: result.manifest,
     human: result.human,
     drift: result.drift,
   };
@@ -128,10 +128,10 @@ export function parseLlmOutput(
   let anyTruncated = false;
 
   // ── Attempt 1: Delimiter-based extraction ──
-  const agentExtraction = extractSection(
+  const manifestExtraction = extractSection(
     rawOutput,
-    DELIMITERS.agent.start,
-    DELIMITERS.agent.end,
+    DELIMITERS.manifest.start,
+    DELIMITERS.manifest.end,
   );
   const humanExtraction = extractSection(
     rawOutput,
@@ -146,13 +146,13 @@ export function parseLlmOutput(
       )
     : { content: null, truncated: false };
 
-  let agentMd = agentExtraction.content;
+  let manifestMd = manifestExtraction.content;
   let humanMd = humanExtraction.content;
   let driftMd = driftExtraction.content;
 
   // Track truncation across all sections
-  if (agentExtraction.truncated) {
-    warnings.push("AS_BUILT_AGENT.md section was truncated (end delimiter missing). Partial content salvaged.");
+  if (manifestExtraction.truncated) {
+    warnings.push("PROJECT_MANIFEST section was truncated (end delimiter missing). Partial content salvaged.");
     anyTruncated = true;
   }
   if (humanExtraction.truncated) {
@@ -165,14 +165,14 @@ export function parseLlmOutput(
   }
 
   // ── Attempt 2: Header-based fallback ──
-  if (!agentMd || !humanMd) {
+  if (!manifestMd || !humanMd) {
     warnings.push(
       "Delimiter-based parsing failed. Attempting header-based extraction.",
     );
     const headerExtracted = extractByHeaders(rawOutput);
 
-    if (!agentMd && headerExtracted.agent) {
-      agentMd = headerExtracted.agent;
+    if (!manifestMd && headerExtracted.manifest) {
+      manifestMd = headerExtracted.manifest;
     }
     if (!humanMd && headerExtracted.human) {
       humanMd = headerExtracted.human;
@@ -182,12 +182,12 @@ export function parseLlmOutput(
     }
   }
 
-  // ── Attempt 3: Last resort — whole response as agent output ──
-  if (!agentMd && !humanMd) {
+  // ── Attempt 3: Last resort — whole response as manifest output ──
+  if (!manifestMd && !humanMd) {
     warnings.push(
-      "Could not extract individual sections. Using entire response as agent output.",
+      "Could not extract individual sections. Using entire response as manifest output.",
     );
-    agentMd = rawOutput.trim();
+    manifestMd = rawOutput.trim();
   }
 
   // Build recovery/missing metadata
@@ -196,13 +196,13 @@ export function parseLlmOutput(
 
   // Determine partial status
   let partial = anyTruncated;
-  if (!agentMd) {
-    warnings.push("AS_BUILT_AGENT.md section is missing from output.");
-    missingSections.push("AS_BUILT_AGENT.md");
+  if (!manifestMd) {
+    warnings.push("PROJECT_MANIFEST section is missing from output.");
+    missingSections.push("PROJECT_MANIFEST");
     partial = true;
-    agentMd = "";
+    manifestMd = "";
   } else {
-    recoveredSections.push("AS_BUILT_AGENT.md");
+    recoveredSections.push("PROJECT_MANIFEST");
   }
   if (!humanMd) {
     warnings.push("AS_BUILT_HUMAN.md section is missing from output.");
@@ -223,7 +223,7 @@ export function parseLlmOutput(
   }
 
   return {
-    agentMd,
+    manifestMd,
     humanMd,
     driftMd: driftMd ?? null,
     partial,

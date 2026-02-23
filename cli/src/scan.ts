@@ -35,7 +35,9 @@ interface ScanRecord {
   scanId: string;
   status: "pending" | "processing" | "completed" | "failed";
   progressLog: string[];
-  outputAgentMd: string;
+  outputManifestMd: string;
+  /** @deprecated Fallback for older API responses. Use outputManifestMd. */
+  outputAgentMd?: string;
   outputHumanMd: string;
   outputDriftMd: string | null;
   projectName: string;
@@ -206,10 +208,12 @@ export async function runScan(
 
     const written: string[] = [];
 
-    if (result.outputAgentMd) {
-      const agentPath = join(outputDir, "AS_BUILT_AGENT.md");
-      await writeFile(agentPath, result.outputAgentMd, "utf-8");
-      written.push(agentPath);
+    const manifestContent = result.outputManifestMd || result.outputAgentMd;
+    if (manifestContent) {
+      const manifestSlug = projectName.replace(/[^a-z0-9]+/gi, "-").toLowerCase();
+      const manifestPath = join(outputDir, `PROJECT_MANIFEST_${manifestSlug}.md`);
+      await writeFile(manifestPath, manifestContent, "utf-8");
+      written.push(manifestPath);
     }
 
     if (result.outputHumanMd) {

@@ -30,7 +30,7 @@ function toScanRecord(
     llmTier: data.llmTier,
     status: data.status,
     progressLog: data.progressLog ?? [],
-    outputAgentMd: data.outputAgentMd ?? "",
+    outputManifestMd: data.outputManifestMd ?? data.outputAgentMd ?? "",
     outputHumanMd: data.outputHumanMd ?? "",
     outputDriftMd: data.outputDriftMd ?? null,
     prdAttached: data.prdAttached ?? false,
@@ -53,7 +53,7 @@ function toScanSummary(
 ): ScanSummary {
   const full = toScanRecord(id, data);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { outputAgentMd, outputHumanMd, outputDriftMd, prdContent, ...summary } =
+  const { outputManifestMd, outputHumanMd, outputDriftMd, prdContent, ...summary } =
     full;
   return summary;
 }
@@ -113,7 +113,7 @@ export async function createScan(input: CreateScanInput): Promise<ScanRecord> {
     prdAttached: input.prdAttached,
     status: "pending" as ScanStatus,
     progressLog: [],
-    outputAgentMd: "",
+    outputManifestMd: "",
     outputHumanMd: "",
     outputDriftMd: null,
     prdContent: null,
@@ -228,7 +228,7 @@ export async function saveScanOutputs(
     .collection(COL)
     .doc(scanId)
     .update({
-      outputAgentMd: payload.outputAgentMd,
+      outputManifestMd: payload.outputManifestMd,
       outputHumanMd: payload.outputHumanMd,
       outputDriftMd: payload.outputDriftMd ?? null,
       fileCount: payload.fileCount,

@@ -22,7 +22,7 @@ export interface DriftPromptInput {
   projectName: string;
   /** The raw PRD content provided by the user. */
   prdContent: string;
-  /** The already-generated AS_BUILT_AGENT.md (the codebase analysis). */
+  /** The already-generated PROJECT_MANIFEST (the codebase analysis). */
   agentMd: string;
   /** Optional: directory tree for additional context. */
   tree?: string[];
@@ -84,7 +84,7 @@ export function buildDriftPrompt(input: DriftPromptInput): string {
   // Add codebase analysis
   sections.push(
     "",
-    "## Codebase Analysis (AS_BUILT_AGENT.md)",
+    "## Codebase Analysis (PROJECT_MANIFEST)",
     "",
     "This is the ground truth of what was actually built. Search this document for evidence of each PRD requirement.",
     "",

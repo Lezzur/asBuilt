@@ -155,7 +155,7 @@ function formatDirectoryTree(tree: string[]): string {
  * and scan configuration. This is the core prompt engineering of as_built.
  *
  * Output format templates are loaded from the prompts/ directory
- * (AS_BUILT_AGENT.md, AS_BUILT_HUMAN.md, PRD_DRIFT.md, OUTPUT_FORMAT.md).
+ * (PROJECT_MANIFEST.md, AS_BUILT_HUMAN.md, PRD_DRIFT.md, OUTPUT_FORMAT.md).
  */
 export function assemblePrompt(input: PromptInput): string {
   const { files, tree, projectName, prdAttached, prdContent } = input;
@@ -163,7 +163,7 @@ export function assemblePrompt(input: PromptInput): string {
   const date = new Date().toISOString().split("T")[0];
 
   // Load output format templates from .md files
-  const agentFormat = loadTemplate("AS_BUILT_AGENT.md");
+  const agentFormat = loadTemplate("PROJECT_MANIFEST.md");
   const humanFormat = loadTemplate("AS_BUILT_HUMAN.md");
   const outputWrapper = loadTemplate("OUTPUT_FORMAT.md");
 
