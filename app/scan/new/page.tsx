@@ -221,7 +221,7 @@ export default function NewScanPage() {
 
   return (
     <AppShell>
-      <div className="max-w-2xl">
+      <div className="max-w-2xl mx-auto">
         <div className="mb-6">
           <h1 className="text-xl font-semibold">New Scan</h1>
           <p className="text-sm text-muted-foreground mt-0.5">
