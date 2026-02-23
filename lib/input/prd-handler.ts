@@ -9,10 +9,6 @@
  */
 
 import mammoth from "mammoth";
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const pdfParse = require("pdf-parse") as (
-  buffer: Buffer,
-) => Promise<{ text: string }>;
 import path from "path";
 
 const SUPPORTED_EXTENSIONS = [".md", ".txt", ".pdf", ".docx"] as const;
@@ -52,6 +48,12 @@ export async function extractPrdText(
 }
 
 async function extractPdf(buffer: Buffer): Promise<string> {
+  // Lazy-import pdf-parse to avoid crashing the module on load in
+  // serverless environments where DOMMatrix is not defined.
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const pdfParse = require("pdf-parse") as (
+    buf: Buffer,
+  ) => Promise<{ text: string }>;
   const data = await pdfParse(buffer);
   return data.text;
 }
