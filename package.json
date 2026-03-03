@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "env:pull": "bash scripts/env-pull.sh"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.45",
