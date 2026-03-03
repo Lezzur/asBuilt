@@ -49,6 +49,11 @@ export const GET = withAuth<RouteContext>(async (request, user, context) => {
   }
 
   const slug = scan.projectName.replace(/[^a-z0-9]+/gi, "_").toLowerCase();
+  const ts = (scan.createdAt instanceof Date ? scan.createdAt : new Date(scan.createdAt))
+    .toISOString()
+    .replace(/[-:]/g, "")
+    .replace("T", "_")
+    .slice(0, 15); // YYYYMMDD_HHmmss
 
   switch (type) {
     case "manifest-md":
@@ -56,7 +61,7 @@ export const GET = withAuth<RouteContext>(async (request, user, context) => {
       return new NextResponse(scan.outputManifestMd, {
         headers: {
           "Content-Type": "text/markdown; charset=utf-8",
-          "Content-Disposition": `attachment; filename="PROJECT_MANIFEST_${slug}.md"`,
+          "Content-Disposition": `attachment; filename="${slug}_PROJECT_MANIFEST_${ts}.md"`,
         },
       });
     }
@@ -65,7 +70,7 @@ export const GET = withAuth<RouteContext>(async (request, user, context) => {
       return new NextResponse(scan.outputHumanMd, {
         headers: {
           "Content-Type": "text/markdown; charset=utf-8",
-          "Content-Disposition": `attachment; filename="${slug}_AS_BUILT_HUMAN.md"`,
+          "Content-Disposition": `attachment; filename="${slug}_AS_BUILT_HUMAN_${ts}.md"`,
         },
       });
     }
@@ -80,7 +85,7 @@ export const GET = withAuth<RouteContext>(async (request, user, context) => {
       return new NextResponse(scan.outputDriftMd, {
         headers: {
           "Content-Type": "text/markdown; charset=utf-8",
-          "Content-Disposition": `attachment; filename="${slug}_PRD_DRIFT.md"`,
+          "Content-Disposition": `attachment; filename="${slug}_PRD_DRIFT_${ts}.md"`,
         },
       });
     }
@@ -100,7 +105,7 @@ export const GET = withAuth<RouteContext>(async (request, user, context) => {
       return new NextResponse(pdfBuffer.buffer as ArrayBuffer, {
         headers: {
           "Content-Type": "application/pdf",
-          "Content-Disposition": `attachment; filename="${slug}_AS_BUILT_HUMAN.pdf"`,
+          "Content-Disposition": `attachment; filename="${slug}_AS_BUILT_HUMAN_${ts}.pdf"`,
           "Content-Length": String(pdfBuffer.byteLength),
         },
       });

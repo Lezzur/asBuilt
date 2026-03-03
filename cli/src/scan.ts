@@ -207,23 +207,28 @@ export async function runScan(
     await mkdir(outputDir, { recursive: true });
 
     const written: string[] = [];
+    const slug = projectName.replace(/[^a-z0-9]+/gi, "_").toLowerCase();
+    const ts = new Date()
+      .toISOString()
+      .replace(/[-:]/g, "")
+      .replace("T", "_")
+      .slice(0, 15); // YYYYMMDD_HHmmss
 
     const manifestContent = result.outputManifestMd || result.outputAgentMd;
     if (manifestContent) {
-      const manifestSlug = projectName.replace(/[^a-z0-9]+/gi, "-").toLowerCase();
-      const manifestPath = join(outputDir, `PROJECT_MANIFEST_${manifestSlug}.md`);
+      const manifestPath = join(outputDir, `${slug}_PROJECT_MANIFEST_${ts}.md`);
       await writeFile(manifestPath, manifestContent, "utf-8");
       written.push(manifestPath);
     }
 
     if (result.outputHumanMd) {
-      const humanPath = join(outputDir, "AS_BUILT_HUMAN.md");
+      const humanPath = join(outputDir, `${slug}_AS_BUILT_HUMAN_${ts}.md`);
       await writeFile(humanPath, result.outputHumanMd, "utf-8");
       written.push(humanPath);
     }
 
     if (result.outputDriftMd) {
-      const driftPath = join(outputDir, "PRD_DRIFT.md");
+      const driftPath = join(outputDir, `${slug}_PRD_DRIFT_${ts}.md`);
       await writeFile(driftPath, result.outputDriftMd, "utf-8");
       written.push(driftPath);
     }
